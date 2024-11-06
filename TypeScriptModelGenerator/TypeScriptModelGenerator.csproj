@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <IsPackable>true</IsPackable>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <PackageId>TypeScriptModelGenerator</PackageId>
+        <VersionPrefix>0.1.0</VersionPrefix>
+        <Title>TypeScriptModelGenerator</Title>
+        <Authors>Verner Fortelius</Authors>
+        <Description>Generate typescript models from dotnet models</Description>
+        <Copyright>Copyright 2024 Verner Fortelius</Copyright>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/vforteli/dotnet-typescript-model-generator</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/vforteli/dotnet-typescript-model-generator</RepositoryUrl>
+        <PackageLicense>https://github.com/vforteli/dotnet-typescript-model-generator/blob/main/LICENSE.md</PackageLicense>
+        <PackageReleaseNotes>Initial test release</PackageReleaseNotes>
+        <PackageTags>typescript code generation</PackageTags>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+</Project>

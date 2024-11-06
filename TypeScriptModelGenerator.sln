@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypeScriptModelGenerator", "TypeScriptModelGenerator\TypeScriptModelGenerator.csproj", "{CABFA1A6-5179-47F4-A54C-A8AAA28557EB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypeScriptModelGeneratorTests", "TypeScriptModelGeneratorTests\TypeScriptModelGeneratorTests.csproj", "{5AFA896A-CEB9-4D1E-BFB8-B98826B3787D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CABFA1A6-5179-47F4-A54C-A8AAA28557EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CABFA1A6-5179-47F4-A54C-A8AAA28557EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CABFA1A6-5179-47F4-A54C-A8AAA28557EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CABFA1A6-5179-47F4-A54C-A8AAA28557EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5AFA896A-CEB9-4D1E-BFB8-B98826B3787D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AFA896A-CEB9-4D1E-BFB8-B98826B3787D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5AFA896A-CEB9-4D1E-BFB8-B98826B3787D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5AFA896A-CEB9-4D1E-BFB8-B98826B3787D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
