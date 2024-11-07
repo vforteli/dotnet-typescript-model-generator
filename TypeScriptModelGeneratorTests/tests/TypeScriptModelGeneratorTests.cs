@@ -9,6 +9,7 @@ public record NullableTypesModel
     public required int? SomeNullableInt { get; init; }
     public required DateTime? SomeNullableDateTime { get; init; }
     public required DateTimeOffset? SomeNullableDateTimeOffset { get; init; }
+    public required Guid? SomeNullableGuid { get; init; }
 }
 
 public record TypesModel
@@ -18,6 +19,7 @@ public record TypesModel
     public required int SomeInt { get; init; }
     public required DateTime SomeDateTime { get; init; }
     public required DateTimeOffset SomeDateTimeOffset { get; init; }
+    public required Guid SomeGuid { get; init; }
 }
 
 public record NullableBooleanModel
@@ -88,6 +90,7 @@ public class TypeScriptModelGeneratorTests
               someInt: number;
               someDateTime: string;
               someDateTimeOffset: string;
+              someGuid: string;
             };
             """;
 
@@ -108,6 +111,7 @@ public class TypeScriptModelGeneratorTests
               someNullableInt: number | null;
               someNullableDateTime: string | null;
               someNullableDateTimeOffset: string | null;
+              someNullableGuid: string | null;
             };
             """;
 
@@ -137,6 +141,7 @@ public class TypeScriptModelGeneratorTests
               someInt: number;
               someDateTime: string;
               someDateTimeOffset: string;
+              someGuid: string;
             };
             """;
 
@@ -163,6 +168,7 @@ public class TypeScriptModelGeneratorTests
               someInt: number;
               someDateTime: string;
               someDateTimeOffset: string;
+              someGuid: string;
             };
             """;
 

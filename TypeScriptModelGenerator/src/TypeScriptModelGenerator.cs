@@ -110,6 +110,7 @@ public static class TypeScriptModelGenerator
             not null when type == typeof(char) => "string",
             not null when type == typeof(DateTime) => "string",
             not null when type == typeof(DateTimeOffset) => "string",
+            not null when type == typeof(Guid) => "string",
             _ => "unknown"
         };
 
