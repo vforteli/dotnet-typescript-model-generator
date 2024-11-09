@@ -1,6 +1,6 @@
 using TypescriptModelGenerator;
 
-namespace TypescriptModelGeneratorTests;
+namespace TypescriptModelGeneratorTests.Tests;
 
 public record NullableTypesModel
 {
@@ -126,6 +126,8 @@ public class TypeScriptModelGeneratorTests
 
         const string expectedType =
             """
+            import type { TypesModel } from "./TypesModel";
+
             export type NestedTypesModel = {
               someNullableBoolean: boolean;
               types: TypesModel;
@@ -174,6 +176,8 @@ public class TypeScriptModelGeneratorTests
 
         const string expectedTypeWithListModel =
             """
+            import type { TypesModel } from "./TypesModel";
+
             export type TypeWithList = {
               typesList: TypesModel[];
             };
@@ -201,6 +205,8 @@ public class TypeScriptModelGeneratorTests
 
         const string expectedTypeWithEnum =
             """
+            import type { SomeEnum } from "./SomeEnum";
+
             export type TypeWithEnum = {
               someEnumValue: SomeEnum;
               someNullableEnumValue: SomeEnum | null;

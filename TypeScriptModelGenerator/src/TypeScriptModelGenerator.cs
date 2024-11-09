@@ -51,7 +51,7 @@ public static class TypeScriptModelGenerator
         // New type which hasnt been seen before, recursively add bits of it to the processed types
         if (type.IsEnum)
         {
-            var tsTypeDefinition = TypescriptTemplates.EnumTemplate
+            var tsTypeDefinition = TypescriptTemplates.Enum
                 .Replace("{{values}}", string.Join(" | ", type.GetEnumNames().Select(v => $"\"{v}\"")))
                 .Replace("{{typeName}}", type.Name);
 
@@ -60,12 +60,19 @@ public static class TypeScriptModelGenerator
         else if (type.IsClass)
         {
             var types = type.GetProperties()
-                .ToImmutableDictionary(k => k.Name.ToCamelCase(), v => ParsePropertyInfo(v, processedTypes));
-
+                .Select(o =>
+                    new KeyValuePair<string, TsType>(o.Name.ToCamelCase(), ParsePropertyInfo(o, processedTypes)))
+                .ToImmutableList();
 
             var tsProperties = types.Select(p => $"  {p.Key}: {p.Value};");
 
-            var tsTypeDefinition = TypescriptTemplates.TypeTemplate
+            var imports = types.Select(o => o.Value).OfType<ComplexType>()
+                .DistinctBy(o => o.Name)
+                .Select(o => TypescriptTemplates.Import.Replace("{{typeName}}", o.Name))
+                .ToList();
+
+            var tsTypeDefinition = (imports.Count != 0 ? TypescriptTemplates.TypeWithImports : TypescriptTemplates.Type)
+                .Replace("{{imports}}", string.Join("\n", imports))
                 .Replace("{{properties}}", string.Join("\n", tsProperties))
                 .Replace("{{typeName}}", type.Name);
 
