@@ -56,7 +56,7 @@ public class TypeScriptModelGeneratorTests
     private static string TestConvertSingleType(Type model)
     {
         var types = new Dictionary<string, string>();
-        TypeScriptModelGenerator.ParseTypeRecursively(model, types);
+        TypeScriptModelGenerator.ParseTypeRecursively(model, types, false);
         return types.Single().Value;
     }
 
@@ -122,7 +122,7 @@ public class TypeScriptModelGeneratorTests
     public void NestedTypesModel()
     {
         var types = new Dictionary<string, string>();
-        var typeName = TypeScriptModelGenerator.ParseTypeRecursively(typeof(NestedTypesModel), types);
+        var typeName = TypeScriptModelGenerator.ParseTypeRecursively(typeof(NestedTypesModel), types, false);
 
         const string expectedType =
             """
@@ -148,7 +148,7 @@ public class TypeScriptModelGeneratorTests
         Assert.Multiple(() =>
         {
             Assert.That(types, Has.Count.EqualTo(2));
-            Assert.That(typeName, Is.EqualTo("NestedTypesModel"));
+            Assert.That(typeName.Name, Is.EqualTo("NestedTypesModel"));
             Assert.That(types["NestedTypesModel"], Is.EqualTo(expectedType));
             Assert.That(types["TypesModel"], Is.EqualTo(expectedNestedType));
         });
@@ -158,7 +158,7 @@ public class TypeScriptModelGeneratorTests
     public void ListTypesModel()
     {
         var types = new Dictionary<string, string>();
-        var typeName = TypeScriptModelGenerator.ParseTypeRecursively(typeof(TypeWithList), types);
+        var typeName = TypeScriptModelGenerator.ParseTypeRecursively(typeof(TypeWithList), types, false);
 
         const string expectedTypesModel =
             """
@@ -182,7 +182,7 @@ public class TypeScriptModelGeneratorTests
         Assert.Multiple(() =>
         {
             Assert.That(types, Has.Count.EqualTo(2));
-            Assert.That(typeName, Is.EqualTo("TypeWithList"));
+            Assert.That(typeName.Name, Is.EqualTo("TypeWithList"));
             Assert.That(types["TypesModel"], Is.EqualTo(expectedTypesModel));
             Assert.That(types["TypeWithList"], Is.EqualTo(expectedTypeWithListModel));
         });
@@ -192,7 +192,7 @@ public class TypeScriptModelGeneratorTests
     public void EnumTypesModel()
     {
         var types = new Dictionary<string, string>();
-        var typeName = TypeScriptModelGenerator.ParseTypeRecursively(typeof(TypeWithEnum), types);
+        var typeName = TypeScriptModelGenerator.ParseTypeRecursively(typeof(TypeWithEnum), types, false);
 
         const string expectedEnumType =
             """
@@ -210,7 +210,7 @@ public class TypeScriptModelGeneratorTests
         Assert.Multiple(() =>
         {
             Assert.That(types, Has.Count.EqualTo(2));
-            Assert.That(typeName, Is.EqualTo("TypeWithEnum"));
+            Assert.That(typeName.Name, Is.EqualTo("TypeWithEnum"));
             Assert.That(types["SomeEnum"], Is.EqualTo(expectedEnumType));
             Assert.That(types["TypeWithEnum"], Is.EqualTo(expectedTypeWithEnum));
         });
