@@ -51,6 +51,12 @@ public record TypeWithEnum
     public required SomeEnum? SomeNullableEnumValue { get; init; }
 }
 
+public record TypeWithDictionary
+{
+    public required Dictionary<string, string> SomeStringDictionary { get; init; }
+    public required Dictionary<SomeEnum, string> SomeEnumDictionary { get; init; }
+}
+
 public class TypeScriptModelGeneratorTests
 {
     private static string TestConvertSingleType(Type model)
@@ -219,6 +225,36 @@ public class TypeScriptModelGeneratorTests
             Assert.That(typeName.Name, Is.EqualTo("TypeWithEnum"));
             Assert.That(types["SomeEnum"], Is.EqualTo(expectedEnumType));
             Assert.That(types["TypeWithEnum"], Is.EqualTo(expectedTypeWithEnum));
+        });
+    }
+
+    [TestCase]
+    public void DictionaryTypesModel()
+    {
+        var types = new Dictionary<string, string>();
+        var typeName = TypeScriptModelGenerator.ParseTypeRecursively(typeof(TypeWithDictionary), types, false);
+
+        const string expectedEnumType =
+            """
+            export type SomeEnum = "Hurr" | "Durr";
+            """;
+
+        const string expectedTypeWithDictionary =
+            """
+            import type { SomeEnum } from "./SomeEnum";
+
+            export type TypeWithDictionary = {
+              someStringDictionary: Record<string, string>;
+              someEnumDictionary: Record<SomeEnum, string>;
+            };
+            """;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(types, Has.Count.EqualTo(2));
+            Assert.That(typeName.Name, Is.EqualTo("TypeWithDictionary"));
+            Assert.That(types["SomeEnum"], Is.EqualTo(expectedEnumType));
+            Assert.That(types["TypeWithDictionary"], Is.EqualTo(expectedTypeWithDictionary));
         });
     }
 }

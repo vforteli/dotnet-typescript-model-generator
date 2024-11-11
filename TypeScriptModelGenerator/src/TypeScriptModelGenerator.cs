@@ -35,6 +35,26 @@ public static class TypeScriptModelGenerator
         bool nullableRefType)
     {
         var isNullableType = TryFromNullableType(type, out type) || nullableRefType;
+
+        if (TryIntoRecordType(type, out var keyType, out var valueType))
+        {
+            var keyTsType = ParseTypeRecursively(keyType, processedTypes, false);
+            var valueTsType = ParseTypeRecursively(valueType, processedTypes, false);
+
+            const string recordTemplate = """Record<{{tkey}}, {{tvalue}}>""";
+
+            var record = recordTemplate
+                .Replace("{{tkey}}", keyTsType.Name)
+                .Replace("{{tvalue}}", valueTsType.Name);
+
+            return new GenericPrimitiveType(
+                record,
+                isNullableType,
+                false,
+                [keyTsType, valueTsType]); 
+        }
+
+
         var isCollectionType = TryFromCollectionType(type, out type);
 
         if (TryToTypescriptPrimitiveType(type, out var primitiveType))
@@ -66,10 +86,16 @@ public static class TypeScriptModelGenerator
 
             var tsProperties = types.Select(p => $"  {p.Key}: {p.Value};");
 
+            var genericTypeImports = types
+                .Select(o => o.Value)
+                .OfType<GenericPrimitiveType>()
+                .SelectMany(o => o.GenericTypes.OfType<ComplexType>());
+
             var imports = types.Select(o => o.Value).OfType<ComplexType>()
-                .DistinctBy(o => o.Name)
-                .Select(o => TypescriptTemplates.Import.Replace("{{typeName}}", o.Name))
-                .ToList();
+                    .Concat(genericTypeImports)
+                    .DistinctBy(o => o.Name)
+                    .Select(o => TypescriptTemplates.Import.Replace("{{typeName}}", o.Name))
+                    .ToImmutableList();
 
             var tsTypeDefinition = (imports.Count != 0 ? TypescriptTemplates.TypeWithImports : TypescriptTemplates.Type)
                 .Replace("{{imports}}", string.Join("\n", imports))
@@ -116,6 +142,25 @@ public static class TypeScriptModelGenerator
         };
 
         return primitiveType != "unknown";
+    }
+
+
+    /// <summary>
+    /// Tries to figure out if this is something that should be converted to a Record
+    /// </summary>
+    /// <returns>True if collection type</returns>
+    private static bool TryIntoRecordType(Type type, out Type keyType, out Type valueType)
+    {
+        if (typeof(IDictionary).IsAssignableFrom(type) && type.GenericTypeArguments.Length == 2)
+        {
+            keyType = type.GenericTypeArguments[0];
+            valueType = type.GenericTypeArguments[1];
+            return true;
+        }
+
+        keyType = typeof(void);
+        valueType = typeof(void);
+        return false;
     }
 
 
