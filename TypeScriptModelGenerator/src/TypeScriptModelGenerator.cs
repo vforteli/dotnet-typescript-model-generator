@@ -139,7 +139,7 @@ public static class TypeScriptModelGenerator
     /// <summary>
     /// Tries to figure out if this is something that should be converted to a Record
     /// </summary>
-    /// <returns>True if collection type</returns>
+    /// <returns>True if Record type</returns>
     private static bool TryIntoRecordType(Type type, out Type keyType, out Type valueType)
     {
         if (typeof(IDictionary).IsAssignableFrom(type) && type.GenericTypeArguments.Length == 2)
@@ -158,7 +158,7 @@ public static class TypeScriptModelGenerator
     /// <summary>
     /// Tries to figure out if this is something that should be converted to a collection
     /// </summary>
-    /// <returns>True if collection type</returns>
+    /// <returns>True if array type</returns>
     private static bool TryFromCollectionType(Type type, out Type underlyingType)
     {
         if (typeof(IList).IsAssignableFrom(type)
