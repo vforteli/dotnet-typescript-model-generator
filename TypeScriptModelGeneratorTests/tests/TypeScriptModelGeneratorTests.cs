@@ -81,8 +81,7 @@ public class TypeScriptModelGeneratorTests
 
         Assert.That(actual, Is.EqualTo(expected));
     }
-
-
+    
     [TestCase]
     public void Properties()
     {
@@ -102,8 +101,7 @@ public class TypeScriptModelGeneratorTests
 
         Assert.That(actual, Is.EqualTo(expected));
     }
-
-
+    
     [TestCase]
     public void NullableProperties()
     {
