@@ -65,6 +65,16 @@ public class SomeClass
     }
 }
 
+public record SomeGenericModel<T>
+{
+    public required List<T> SomeGenericList { get; init; }
+}
+
+public record SomeGenericContainingModel
+{
+    public required SomeGenericModel<int> SomeGenericThing { get; init; }
+}
+
 public class TypeScriptModelGeneratorTests
 {
     private static string TestConvertSingleType(Type model)
@@ -273,13 +283,46 @@ public class TypeScriptModelGeneratorTests
         var methodInfo = typeof(SomeClass).GetMethods().First();
 
         var tsType = TypeScriptModelGenerator.ParseParameterInfo(methodInfo.GetParameters().First(), types);
-        
+
         Assert.Multiple(() =>
         {
             Assert.That(types, Has.Count.EqualTo(2));
             Assert.That(tsType.Name,
                 Is.EqualTo("TypeWithEnum")); // Nullable reference type determined to be nullable here from parameterinfo
             Assert.That(tsType.IsNullable, Is.True);
+        });
+    }
+
+
+    [TestCase]
+    public void GenericType()
+    {
+        var types = new Dictionary<string, string>();
+        var typeName = TypeScriptModelGenerator.ParseTypeRecursively(typeof(SomeGenericContainingModel), types, false);
+
+        const string expectedType =
+            """
+            import type { SomeGenericModel } from "./SomeGenericModel`1";
+
+            export type SomeGenericContainingModel = {
+              someGenericThing: SomeGenericModel<number>;
+            };
+            """;
+
+        const string expectedGenericType =
+            """
+            export type SomeGenericModel<T> = {
+              someGenericList: T[];
+            };
+            """;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(types, Has.Count.EqualTo(2));
+            Assert.That(typeName.Name, Is.EqualTo("SomeGenericContainingModel"));
+            
+            Assert.That(types["SomeGenericContainingModel"], Is.EqualTo(expectedType));
+            Assert.That(types["SomeGenericModel`1"], Is.EqualTo(expectedGenericType));
         });
     }
 }
