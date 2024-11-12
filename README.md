@@ -17,6 +17,8 @@ var type = TypeScriptModelGenerator.ParseParameterInfo(someParameterInfo, types)
 // types will contain a dictionary of all the recognized TypeScript type names and their respective definition
 ```
 
+See tests for more examples of output
+
 Note that it is not possible to determine if a generic parameter is nullable through reflection.
 Therefore cases such as Task<SomeReferenceType?> cannot be detected.
 

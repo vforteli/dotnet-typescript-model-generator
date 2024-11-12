@@ -22,7 +22,7 @@ public static class TypeScriptModelGenerator
     /// Parse a property and return its typescript type
     /// </summary>
     /// <returns>Either the primitive typescript type, or the name of complex type created</returns>
-    private static TsType ParsePropertyInfo(PropertyInfo propertyInfo, Dictionary<string, string> processedTypes) =>
+    public static TsType ParsePropertyInfo(PropertyInfo propertyInfo, Dictionary<string, string> processedTypes) =>
         ParseTypeRecursively(propertyInfo.PropertyType, processedTypes,
             NullabilityInfoContext.Create(propertyInfo).WriteState is NullabilityState.Nullable);
 
