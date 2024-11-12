@@ -57,6 +57,14 @@ public record TypeWithDictionary
     public required Dictionary<SomeEnum, string> SomeEnumDictionary { get; init; }
 }
 
+public class SomeClass
+{
+    public Task<TypesModel> DoSomething(TypeWithEnum? someEnum)
+    {
+        throw new NotImplementedException("nothing to do");
+    }
+}
+
 public class TypeScriptModelGeneratorTests
 {
     private static string TestConvertSingleType(Type model)
@@ -81,7 +89,7 @@ public class TypeScriptModelGeneratorTests
 
         Assert.That(actual, Is.EqualTo(expected));
     }
-    
+
     [TestCase]
     public void Properties()
     {
@@ -101,7 +109,7 @@ public class TypeScriptModelGeneratorTests
 
         Assert.That(actual, Is.EqualTo(expected));
     }
-    
+
     [TestCase]
     public void NullableProperties()
     {
@@ -253,6 +261,25 @@ public class TypeScriptModelGeneratorTests
             Assert.That(typeName.Name, Is.EqualTo("TypeWithDictionary"));
             Assert.That(types["SomeEnum"], Is.EqualTo(expectedEnumType));
             Assert.That(types["TypeWithDictionary"], Is.EqualTo(expectedTypeWithDictionary));
+        });
+    }
+
+
+    [TestCase]
+    public void ParameterInfo()
+    {
+        var types = new Dictionary<string, string>();
+
+        var methodInfo = typeof(SomeClass).GetMethods().First();
+
+        var tsType = TypeScriptModelGenerator.ParseParameterInfo(methodInfo.GetParameters().First(), types);
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(types, Has.Count.EqualTo(2));
+            Assert.That(tsType.Name,
+                Is.EqualTo("TypeWithEnum")); // Nullable reference type determined to be nullable here from parameterinfo
+            Assert.That(tsType.IsNullable, Is.True);
         });
     }
 }
