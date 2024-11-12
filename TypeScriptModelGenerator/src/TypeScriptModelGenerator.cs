@@ -41,20 +41,13 @@ public static class TypeScriptModelGenerator
             var keyTsType = ParseTypeRecursively(keyType, processedTypes, false);
             var valueTsType = ParseTypeRecursively(valueType, processedTypes, false);
 
-            const string recordTemplate = """Record<{{tkey}}, {{tvalue}}>""";
-
-            var record = recordTemplate
-                .Replace("{{tkey}}", keyTsType.Name)
-                .Replace("{{tvalue}}", valueTsType.Name);
-
             return new GenericPrimitiveType(
-                record,
+                $"Record<{keyTsType.Name}, {valueTsType.Name}>",
                 isNullableType,
                 false,
-                [keyTsType, valueTsType]); 
+                [keyTsType, valueTsType]);
         }
-
-
+        
         var isCollectionType = TryFromCollectionType(type, out type);
 
         if (TryToTypescriptPrimitiveType(type, out var primitiveType))
@@ -83,23 +76,21 @@ public static class TypeScriptModelGenerator
                 .Select(o =>
                     new KeyValuePair<string, TsType>(o.Name.ToCamelCase(), ParsePropertyInfo(o, processedTypes)))
                 .ToImmutableList();
-
-            var tsProperties = types.Select(p => $"  {p.Key}: {p.Value};");
-
+            
             var genericTypeImports = types
                 .Select(o => o.Value)
                 .OfType<GenericPrimitiveType>()
                 .SelectMany(o => o.GenericTypes.OfType<ComplexType>());
 
             var imports = types.Select(o => o.Value).OfType<ComplexType>()
-                    .Concat(genericTypeImports)
-                    .DistinctBy(o => o.Name)
-                    .Select(o => TypescriptTemplates.Import.Replace("{{typeName}}", o.Name))
-                    .ToImmutableList();
+                .Concat(genericTypeImports)
+                .DistinctBy(o => o.Name)
+                .Select(o => TypescriptTemplates.Import.Replace("{{typeName}}", o.Name))
+                .ToImmutableList();
 
             var tsTypeDefinition = (imports.Count != 0 ? TypescriptTemplates.TypeWithImports : TypescriptTemplates.Type)
                 .Replace("{{imports}}", string.Join("\n", imports))
-                .Replace("{{properties}}", string.Join("\n", tsProperties))
+                .Replace("{{properties}}", string.Join("\n", types.Select(p => $"  {p.Key}: {p.Value};")))
                 .Replace("{{typeName}}", type.Name);
 
             processedTypes.Add(type.Name, tsTypeDefinition);
