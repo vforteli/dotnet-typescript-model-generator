@@ -65,14 +65,17 @@ public class SomeClass
     }
 }
 
-public record SomeGenericModel<T>
+public record SomeGenericModel<TFoo, TBar, THurr>
 {
-    public required List<T> SomeGenericList { get; init; }
+    public required List<TFoo> SomeGenericFooList { get; init; }
+    public required List<TBar> SomeGenericBarList { get; init; }
+    public required THurr SomeGenericHurr { get; init; }
+    public required string SomeString { get; init; }
 }
 
 public record SomeGenericContainingModel
 {
-    public required SomeGenericModel<int> SomeGenericThing { get; init; }
+    public required SomeGenericModel<int, string, string> SomeGenericThing { get; init; }
 }
 
 public class TypeScriptModelGeneratorTests
@@ -302,27 +305,31 @@ public class TypeScriptModelGeneratorTests
 
         const string expectedType =
             """
-            import type { SomeGenericModel } from "./SomeGenericModel`1";
+            import type { SomeGenericModel } from "./SomeGenericModel";
 
             export type SomeGenericContainingModel = {
-              someGenericThing: SomeGenericModel<number>;
+              someGenericThing: SomeGenericModel<number, string, string>;
             };
             """;
 
         const string expectedGenericType =
             """
-            export type SomeGenericModel<T> = {
-              someGenericList: T[];
+            export type SomeGenericModel<TFoo, TBar, THurr> = {
+              someGenericFooList: TFoo[];
+              someGenericBarList: TBar[];
+              someGenericHurr: THurr;
+              someString: string;
             };
             """;
 
+        var derp = typeof(SomeGenericModel<int,string, int>);
         Assert.Multiple(() =>
         {
             Assert.That(types, Has.Count.EqualTo(2));
             Assert.That(typeName.Name, Is.EqualTo("SomeGenericContainingModel"));
             
             Assert.That(types["SomeGenericContainingModel"], Is.EqualTo(expectedType));
-            Assert.That(types["SomeGenericModel`1"], Is.EqualTo(expectedGenericType));
+            Assert.That(types["SomeGenericModel"], Is.EqualTo(expectedGenericType));
         });
     }
 }
