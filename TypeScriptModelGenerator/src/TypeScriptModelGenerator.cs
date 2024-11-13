@@ -6,7 +6,7 @@ namespace TypescriptModelGenerator;
 
 public static class TypeScriptModelGenerator
 {
-    private static readonly NullabilityInfoContext NullabilityInfoContext = new NullabilityInfoContext();
+    private static readonly NullabilityInfoContext NullabilityInfoContext = new();
 
 
     /// <summary>
@@ -41,27 +41,32 @@ public static class TypeScriptModelGenerator
             var keyTsType = ParseTypeRecursively(keyType, processedTypes, false);
             var valueTsType = ParseTypeRecursively(valueType, processedTypes, false);
 
-            return new GenericPrimitiveType(
-                $"Record<{keyTsType.Name}, {valueTsType.Name}>",
+            return new PrimitiveType(
+                "Record",
                 isNullableType,
                 false,
                 [keyTsType, valueTsType]);
         }
-        
+
         var isCollectionType = TryFromCollectionType(type, out type);
 
-        if (TryToTypescriptPrimitiveType(type, out var primitiveType))
+        if (TryIntoTypescriptPrimitiveType(type, out var primitiveType))
         {
-            return new PrimitiveType(primitiveType, isNullableType, isCollectionType);
+            return new PrimitiveType(primitiveType, isNullableType, isCollectionType, []);
+        }
+
+        if (type.IsGenericParameter)
+        {
+            // todo this is all a bit sketchy...
+            return new PrimitiveType(type.Name, false, isCollectionType, []);
         }
 
         // If we already have seen this type before, just return the name
         if (processedTypes.ContainsKey(type.Name))
         {
-            return new ComplexType(type.Name, isNullableType, isCollectionType);
+            return new ComplexType(type.Name, isNullableType, isCollectionType, []);
         }
 
-        // New type which hasnt been seen before, recursively add bits of it to the processed types
         if (type.IsEnum)
         {
             var tsTypeDefinition = TypescriptTemplates.Enum
@@ -69,20 +74,37 @@ public static class TypeScriptModelGenerator
                 .Replace("{{typeName}}", type.Name);
 
             processedTypes.Add(type.Name, tsTypeDefinition);
+            return new ComplexType(type.Name, isNullableType, isCollectionType, []);
         }
-        else if (type.IsClass)
+
+        if (type.IsClass)
         {
-            var types = type.GetProperties()
+            var typeName = type.Name.Split('`')[0]; // generic types include the arity as SomeType`n, get rid of it...
+            var genericTypeArguments = type.GenericTypeArguments
+                .Select(t =>
+                    new KeyValuePair<Type, TsType>(t,
+                        ParseTypeRecursively(t, processedTypes, false)))
+                .ToImmutableList();
+
+            var genericTypeName = typeName;
+            if (type.IsGenericType)
+            {
+                genericTypeName = GetGenericTypeName(type);
+            }
+
+            var propertiesTypes = (type.IsGenericType
+                    ? type.Assembly.DefinedTypes.Single(o => o.Name == type.Name).GetProperties()
+                    : type.GetProperties())
                 .Select(o =>
                     new KeyValuePair<string, TsType>(o.Name.ToCamelCase(), ParsePropertyInfo(o, processedTypes)))
                 .ToImmutableList();
-            
-            var genericTypeImports = types
-                .Select(o => o.Value)
-                .OfType<GenericPrimitiveType>()
-                .SelectMany(o => o.GenericTypes.OfType<ComplexType>());
 
-            var imports = types.Select(o => o.Value).OfType<ComplexType>()
+            var genericTypeImports = propertiesTypes
+                .Select(o => o.Value)
+                .OfType<PrimitiveType>()
+                .SelectMany(o => o.GenericTypeArguments.OfType<ComplexType>());
+
+            var imports = propertiesTypes.Select(o => o.Value).OfType<ComplexType>()
                 .Concat(genericTypeImports)
                 .DistinctBy(o => o.Name)
                 .Select(o => TypescriptTemplates.Import.Replace("{{typeName}}", o.Name))
@@ -90,24 +112,43 @@ public static class TypeScriptModelGenerator
 
             var tsTypeDefinition = (imports.Count != 0 ? TypescriptTemplates.TypeWithImports : TypescriptTemplates.Type)
                 .Replace("{{imports}}", string.Join("\n", imports))
-                .Replace("{{properties}}", string.Join("\n", types.Select(p => $"  {p.Key}: {p.Value};")))
-                .Replace("{{typeName}}", type.Name);
+                .Replace("{{properties}}", string.Join("\n", propertiesTypes.Select(p => $"  {p.Key}: {p.Value};")))
+                .Replace("{{typeName}}", genericTypeName);
 
-            processedTypes.Add(type.Name, tsTypeDefinition);
-        }
-        else
-        {
-            throw new ArgumentException($"What do we do with this?");
+            processedTypes.Add(typeName, tsTypeDefinition);
+
+            return new ComplexType(
+                typeName,
+                isNullableType,
+                isCollectionType,
+                genericTypeArguments.Select(o => o.Value).ToImmutableList());
         }
 
-        return new ComplexType(type.Name, isNullableType, isCollectionType);
+        throw new ArgumentException($"What do we do with this?");
     }
 
 
     /// <summary>
-    /// Get the typescript primitive type from c# type if possible
+    /// Get the name of the type with the generic parameter names eg SomeType&lt;TKey, TValue, TFoo&gt;
     /// </summary>
-    private static bool TryToTypescriptPrimitiveType(Type type, out string primitiveType)
+    private static string GetGenericTypeName(Type type)
+    {
+        var typeName = type.Name.Split('`')[0];
+        var parameters = type.Assembly.DefinedTypes.Single(o => o.Name == type.Name).GenericTypeParameters
+            .Select(o => new PrimitiveType(o.Name, false, false, [])).ToImmutableList();
+
+        return parameters.IsEmpty
+            ? typeName
+            : $"{typeName}<{string.Join(", ", parameters)}>";
+    }
+
+
+    /// <summary>
+    /// Get the typescript primitive type from c# type if possible, eg:
+    /// string -> string
+    /// int, float etc -> number
+    /// </summary>
+    private static bool TryIntoTypescriptPrimitiveType(Type type, out string primitiveType)
     {
         primitiveType = type switch
         {
