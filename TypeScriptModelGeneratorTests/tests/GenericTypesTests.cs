@@ -12,7 +12,7 @@ public record SomeGenericModel<TFoo, TBar, THurr>
 
 public record SomeGenericContainingModel
 {
-    public required SomeGenericModel<int, string, string> SomeGenericThing { get; init; }
+    public required SomeGenericModel<int, string, TypesModel> SomeGenericThing { get; init; }
 }
 
 public class GenericTypesTests
@@ -26,9 +26,10 @@ public class GenericTypesTests
         const string expectedType =
             """
             import type { SomeGenericModel } from "./SomeGenericModel";
+            import type { TypesModel } from "./TypesModel";
 
             export type SomeGenericContainingModel = {
-              someGenericThing: SomeGenericModel<number, string, string>;
+              someGenericThing: SomeGenericModel<number, string, TypesModel>;
             };
             """;
 
@@ -41,15 +42,28 @@ public class GenericTypesTests
               someString: string;
             };
             """;
+        
+        const string expectedTypesModel =
+            """
+            export type TypesModel = {
+              someBoolean: boolean;
+              someString: string;
+              someInt: number;
+              someDateTime: string;
+              someDateTimeOffset: string;
+              someGuid: string;
+            };
+            """;
 
         var derp = typeof(SomeGenericModel<int,string, int>);
         Assert.Multiple(() =>
         {
-            Assert.That(types, Has.Count.EqualTo(2));
+            Assert.That(types, Has.Count.EqualTo(3));
             Assert.That(typeName.Name, Is.EqualTo("SomeGenericContainingModel"));
             
             Assert.That(types["SomeGenericContainingModel"], Is.EqualTo(expectedType));
             Assert.That(types["SomeGenericModel"], Is.EqualTo(expectedGenericType));
+            Assert.That(types["TypesModel"], Is.EqualTo(expectedTypesModel));
         });
     }
 }
