@@ -41,11 +41,7 @@ public static class TypeScriptModelGenerator
             var keyTsType = ParseTypeRecursively(keyType, processedTypes, false);
             var valueTsType = ParseTypeRecursively(valueType, processedTypes, false);
 
-            return new PrimitiveType(
-                "Record",
-                isNullableType,
-                false,
-                [keyTsType, valueTsType]);
+            return new PrimitiveType("Record", isNullableType, false, [keyTsType, valueTsType]);
         }
 
         var isCollectionType = TryFromCollectionType(type, out type);
