@@ -97,7 +97,6 @@ public static class TypeScriptModelGenerator
 
             var genericTypeImports = propertiesTypes
                 .Select(o => o.Value)
-                .OfType<PrimitiveType>()
                 .SelectMany(o => o.GenericTypeArguments.OfType<ComplexType>());
 
             var imports = propertiesTypes.Select(o => o.Value).OfType<ComplexType>()
