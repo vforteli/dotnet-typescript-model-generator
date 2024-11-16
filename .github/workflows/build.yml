@@ -86,12 +86,13 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
 
-      - name: Push
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Push production
+        working-directory: ./nugetpackage/TypeScriptModelGenerator/bin/Release/
         run: |
-          TAG=${{github.ref_name}}
-          VERSION=${TAG#v}
-          dotnet nuget push ./nugetpackage/FuzzySearchNet/bin/Release/FuzzySearch.Net.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_PAT}
-
+          FILENAME=$(ls *.nupkg | head -n 1)
+          dotnet nuget push ./${FILENAME} \
+            --source https://api.nuget.org/v3/index.json \
+            --api-key ${NUGET_PAT} \
+            --skip-duplicate
         env:
           NUGET_PAT: ${{ secrets.NUGET_PAT }}
